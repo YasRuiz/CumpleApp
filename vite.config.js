@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/CumpleApp/', // 👈 Esto es fundamental para GitHub Pages
+  base: '/CumpleApp/', // importante para que funcione en GitHub Pages
   plugins: [
     react(),
     VitePWA({
@@ -18,7 +18,7 @@ export default defineConfig({
         orientation: 'portrait',
         icons: [
           {
-            src: 'icons/icon-192x192.png', // 👈 sin slash inicial
+            src: 'icons/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },

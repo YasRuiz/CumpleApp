@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { db } from "./firebase"; // Asegúrate de tener firebase.js configurado
+import { db } from "./firebase.js"; // Asegúrate de tener firebase.js configurado
 import {
   collection,
   addDoc,

@@ -1,41 +1,95 @@
-# 🎉 CumpleApp 🎂
+🎉 App de Cumpleaños 🎂
+Esta es una aplicación web hecha con React y Firebase para registrar y mostrar cumpleaños. Ofrece una interfaz amigable para invitados y administradores, con funciones como agregar, editar, eliminar y filtrar cumpleaños por mes, así como una contraseña de administrador editable.
 
-Una hermosa aplicación hecha con **React + Tailwind CSS** para **registrar cumpleaños** de tus compañeros. Incluye animaciones suaves, confeti celebrativo 🎊 y diseño adaptativo moderno.
+🚀 Características
+Ver cumpleaños de todos los meses o filtrar por mes.
 
----
+Agregar, editar y eliminar cumpleaños (solo para admins).
 
-## 📸 Vista previa
+Mostrar quién cumple años hoy.
 
-![Preview](https://media1.giphy.com/media/VyB31XTqZNJhFRZNyl/giphy.gif)
+Lanzamiento de confeti al agregar cumpleaños.
 
----
+Autenticación básica con contraseña de administrador.
 
-## 🚀 Funcionalidades
+Cambiar contraseña del administrador (almacenada en localStorage).
 
-✅ Agregar cumpleaños  
-✅ Editar y eliminar entradas  
-✅ Guardado local (LocalStorage)  
-✅ Animaciones suaves con [Framer Motion](https://www.framer.com/motion/)  
-✅ Estilo moderno con [TailwindCSS](https://tailwindcss.com/)  
-✅ Confeti 🎊 al agregar cumpleaños
+🛠️ Tecnologías usadas
+React (hooks y JSX)
 
----
+Tailwind CSS (estilos rápidos y responsive)
 
-## 🧑‍💻 Tecnologías usadas
+Firebase Firestore (base de datos)
 
-- React
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Confetti (efecto visual)
-- LocalStorage
+canvas-confetti (efecto visual divertido)
 
----
+📦 Instalación
+Clona el repositorio:
 
-## 📦 Instalación
+bash
+Copiar
+Editar
+git clone https://github.com/tu-usuario/cumples-app.git
+cd cumples-app
+Instala las dependencias:
 
-1. Clona el repositorio:
+bash
+Copiar
+Editar
+npm install
+Configura Firebase:
 
-```bash
-git clone https://github.com/YasRuiz/CumpleApp.git
-cd CumpleApp
+Asegúrate de tener un proyecto de Firebase creado. Luego, crea un archivo firebase.js dentro de src/:
+
+js
+Copiar
+Editar
+// src/firebase.js
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+Ejecuta la aplicación:
+
+bash
+Copiar
+Editar
+npm run dev
+🔐 Contraseña de administrador
+Por defecto: admin123
+
+Puedes cambiarla desde la interfaz de administrador.
+
+La nueva contraseña se guarda en localStorage, así que solo es válida para ese navegador/dispositivo.
+
+📁 Estructura del proyecto
+bash
+Copiar
+Editar
+src/
+│
+├── App.jsx            # Componente principal
+├── firebase.js        # Configuración de Firebase
+├── index.js           # Entrada de la app
+└── styles.css         # Estilos (usando Tailwind)
+✅ TODO futuro (opcional)
+Agregar autenticación real con Firebase Auth.
+
+Notificaciones por email o push cuando alguien cumple.
+
+Exportar/Importar cumpleaños (CSV).
+
+Soporte para año completo (no solo DDMM).
+
+📄 Licencia
+Este proyecto es libre para uso personal o educativo. Puedes modificarlo a tu gusto.

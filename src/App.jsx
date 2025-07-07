@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { db } from "./firebase.js"; // Asegúrate de tener firebase.js configurado
+import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
@@ -38,7 +38,6 @@ function App() {
     const dia = hoy.getDate().toString().padStart(2, "0");
     const mes = (hoy.getMonth() + 1).toString().padStart(2, "0");
     const hoyStr = `${dia}${mes}`;
-
     const cumpleaneros = cumples.filter(c => c.fecha === hoyStr);
     setCumplesHoy(cumpleaneros);
   }, [cumples]);
@@ -121,6 +120,26 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-center mb-4">🎉 Cumpleaños 🎈</h1>
+
+      {/* Botones de sesión */}
+      <div className="flex justify-between items-center w-full max-w-md mb-4">
+        {modo === "admin" && (
+          <button
+            onClick={() => setModo(null)}
+            className="text-sm text-red-600 hover:underline"
+          >
+            🔐 Cerrar sesión
+          </button>
+        )}
+        {modo === "invitado" && (
+          <button
+            onClick={() => setModo(null)}
+            className="text-sm text-gray-700 hover:underline"
+          >
+            ⬅️ Volver
+          </button>
+        )}
+      </div>
 
       {cumplesHoy.length > 0 && (
         <div className="bg-green-200 p-4 rounded-lg mb-4 text-center w-full max-w-md shadow-md">

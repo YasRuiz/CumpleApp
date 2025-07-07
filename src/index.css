@@ -1,3 +1,15 @@
 @tailwind base;
+/* Aquí importo los estilos base que Tailwind proporciona. 
+   Incluyen un reset de navegador (como el de Normalize.css) 
+   y estilos predeterminados que mejoran la consistencia visual 
+   en todos los navegadores. */
+
 @tailwind components;
+/* Con esta línea incluyo los componentes predefinidos de Tailwind.
+   Son clases reutilizables como botones, formularios, etc., 
+   que Tailwind puede generar automáticamente o que yo puedo extender. */
+
 @tailwind utilities;
+/* Finalmente, aquí cargo todas las utilidades de Tailwind: 
+   clases como `p-4`, `text-center`, `bg-blue-500`, etc. 
+   Estas utilidades son la base del enfoque "utility-first" de Tailwind. */

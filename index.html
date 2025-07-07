@@ -1,23 +1,42 @@
 <!doctype html>
+<!-- Le indico al navegador que este documento es HTML5 -->
+
 <html lang="es">
+<!-- Declaro que el contenido está en español, útil para accesibilidad y SEO -->
+
   <head>
     <meta charset="UTF-8" />
+    <!-- Configuro la codificación para que soporte caracteres especiales como tildes y emojis -->
+
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3176/3176364.png" type="image/png" />
+    <!-- Le pongo un ícono personalizado a la pestaña del navegador (favicon) -->
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Hago que el diseño sea responsive, adaptándose a distintos tamaños de pantalla -->
 
     <!-- SEO y accesibilidad -->
     <meta name="description" content="App para registrar y recordar cumpleaños de tus compañeros. 🎉" />
+    <!-- Descripción corta para buscadores y redes sociales -->
+
     <meta name="theme-color" content="#f9a8d4" />
+    <!-- Color para la barra superior del navegador en móviles -->
 
     <!-- Título de la pestaña -->
     <title>🎂 CumpleApp - Cumpleaños de Compañeros</title>
+    <!-- Nombre que aparece en la pestaña del navegador -->
 
     <!-- Fuente bonita -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Importo la fuente Fredoka desde Google Fonts, que se ve más amigable y divertida -->
   </head>
+
   <body class="font-[Fredoka] bg-pink-50 text-gray-800">
+    <!-- Aplico la fuente que importé, un fondo rosado suave, y un color de texto gris oscuro -->
+
     <div id="root"></div>
+    <!-- Este es el contenedor donde React monta toda la aplicación -->
+
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Importo el archivo principal de React como un módulo moderno (main.jsx) -->
   </body>
 </html>
-

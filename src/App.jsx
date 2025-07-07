@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { db } from "./firebase";
 import {
@@ -58,7 +57,7 @@ function App() {
   };
 
   const agregarOEditarCumple = async () => {
-    if (!nombre || fechaInput.length !== 4) {
+    if (!nombre || !/^\d{4}$/.test(fechaInput)) {
       alert("Ingresa nombre y una fecha válida (DDMM).");
       return;
     }
@@ -66,20 +65,21 @@ function App() {
     const nuevo = { nombre, fecha: fechaInput };
     if (editId) {
       await updateDoc(doc(db, "cumples", editId), nuevo);
+      setCumples(cumples.map(c => c.id === editId ? { ...nuevo, id: editId } : c));
       setEditId(null);
     } else {
-      await addDoc(refCumples, nuevo);
+      const docRef = await addDoc(refCumples, nuevo);
+      setCumples([...cumples, { ...nuevo, id: docRef.id }]);
       confetti();
     }
 
     setNombre("");
     setFechaInput("");
-    obtenerCumples();
   };
 
   const eliminarCumple = async (id) => {
     await deleteDoc(doc(db, "cumples", id));
-    obtenerCumples();
+    setCumples(cumples.filter(c => c.id !== id));
   };
 
   const editarCumple = (c) => {
@@ -132,7 +132,6 @@ function App() {
             >
               Administrador
             </button>
-
             <button
               onClick={() => alert("Contacta al soporte para restablecer tu contraseña.")}
               className="text-sm text-blue-700 mt-2 underline"
@@ -149,14 +148,12 @@ function App() {
     <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
       <div className="w-full max-w-md flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🎉 Cumpleaños 🎈</h1>
-        {modo === "admin" && (
-          <button
-            onClick={() => setModo(null)}
-            className="text-sm text-red-600 underline"
-          >
-            Cerrar sesión
-          </button>
-        )}
+        <button
+          onClick={() => setModo(null)}
+          className="text-sm text-red-600 underline"
+        >
+          {modo === "admin" ? "Cerrar sesión" : "Volver"}
+        </button>
       </div>
 
       {cumplesHoy.length > 0 && (

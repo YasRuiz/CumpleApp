@@ -3,42 +3,43 @@ import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 
 function App() {
-  const [modo, setModo] = useState(null); // 'admin' o 'invitado'
-  const [intentoClave, setIntentoClave] = useState("");
   const [nombre, setNombre] = useState("");
   const [fechaInput, setFechaInput] = useState("");
   const [cumples, setCumples] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
   const [mesFiltro, setMesFiltro] = useState("");
+  const [modo, setModo] = useState(null);
+  const [intentoClave, setIntentoClave] = useState("");
 
-  const CLAVE_ADMIN = "admin123";
+  const [claveAdmin, setClaveAdmin] = useState(
+    localStorage.getItem("claveAdmin") || "admin123"
+  );
+
   const meses = [
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
 
-  // Cargar cumpleaños guardados
   useEffect(() => {
     const guardados = localStorage.getItem("cumples");
     if (guardados) setCumples(JSON.parse(guardados));
   }, []);
 
-  // Guardar en localStorage
   useEffect(() => {
     localStorage.setItem("cumples", JSON.stringify(cumples));
   }, [cumples]);
 
   const formatearFecha = (fecha) => {
-    const [y, m, d] = fecha.split("-");
-    return `${parseInt(d)} de ${meses[parseInt(m) - 1]} de ${y}`;
+    const [anio, mes, dia] = fecha.split("-");
+    return `${parseInt(dia)} de ${meses[parseInt(mes) - 1]} de ${anio}`;
   };
 
   const validarFecha = (valor) => {
     if (valor.length !== 8) return null;
     try {
-      const day = parseInt(valor.slice(0, 2), 10);
-      const month = parseInt(valor.slice(2, 4), 10);
       const year = parseInt(valor.slice(4, 8), 10);
+      const month = parseInt(valor.slice(2, 4), 10);
+      const day = parseInt(valor.slice(0, 2), 10);
       const maxDays = new Date(year, month, 0).getDate();
 
       if (
@@ -59,28 +60,25 @@ function App() {
       alert("Completa nombre y una fecha válida (DDMMYYYY).");
       return;
     }
-
     const nuevo = { nombre, fecha: fechaFormateada };
-    let actualizados;
-
     if (editIndex !== null) {
-      actualizados = [...cumples];
+      const actualizados = [...cumples];
       actualizados[editIndex] = nuevo;
+      setCumples(actualizados);
       setEditIndex(null);
     } else {
-      actualizados = [...cumples, nuevo];
-      confetti(); // 🎉
+      const actualizados = [...cumples, nuevo];
+      setCumples(actualizados);
+      confetti();
     }
-
-    setCumples(actualizados);
     setNombre("");
     setFechaInput("");
   };
 
   const editarCumple = (index) => {
     const c = cumples[index];
-    const [y, m, d] = c.fecha.split("-");
     setNombre(c.nombre);
+    const [y, m, d] = c.fecha.split("-");
     setFechaInput(`${d}${m}${y}`);
     setEditIndex(index);
   };
@@ -90,17 +88,33 @@ function App() {
     setCumples(filtrados);
   };
 
+  const cambiarClave = () => {
+    const nuevaClave = prompt("Ingresa nueva contraseña para administrador:");
+    if (nuevaClave && nuevaClave.trim().length >= 4) {
+      localStorage.setItem("claveAdmin", nuevaClave.trim());
+      setClaveAdmin(nuevaClave.trim());
+      alert("Contraseña actualizada.");
+    } else {
+      alert("Debe tener al menos 4 caracteres.");
+    }
+  };
+
+  const recuperarClave = () => {
+    alert(`Tu contraseña actual es: ${claveAdmin}`);
+  };
+
   const cumplesFiltrados = mesFiltro
     ? cumples.filter((c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro))
     : cumples;
 
-  // Pantalla de selección de modo
   if (!modo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-pink-200 font-[Fredoka]">
-        <div className="bg-white p-6 rounded-lg shadow-lg space-y-4 text-center w-full max-w-xs">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-pink-200">
+        <div className="bg-white p-6 rounded-lg shadow-lg space-y-4 text-center w-full max-w-sm">
           <h2 className="text-xl font-semibold">¿Cómo quieres ingresar?</h2>
-          <button onClick={() => setModo("invitado")} className="bg-green-500 text-white px-4 py-2 rounded w-full">Invitado</button>
+          <button onClick={() => setModo("invitado")} className="bg-green-500 text-white px-4 py-2 rounded w-full">
+            Invitado
+          </button>
           <div>
             <input
               type="password"
@@ -111,11 +125,22 @@ function App() {
             />
             <button
               onClick={() => {
-                if (intentoClave === CLAVE_ADMIN) setModo("admin");
-                else alert("Contraseña incorrecta");
+                if (intentoClave === claveAdmin) {
+                  setModo("admin");
+                } else {
+                  alert("Contraseña incorrecta");
+                }
               }}
               className="bg-blue-500 text-white mt-2 px-4 py-2 rounded w-full"
-            >Administrador</button>
+            >
+              Administrador
+            </button>
+            <button
+              onClick={recuperarClave}
+              className="text-sm text-blue-600 mt-2 underline"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
         </div>
       </div>
@@ -123,16 +148,18 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6 font-[Fredoka]">
-      <motion.h1
-        className="text-3xl font-bold text-center mb-2 text-blue-800"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        🎉 Cumpleaños de Compañeros 🎈
-      </motion.h1>
-
-      <p className="text-sm italic mb-4 text-gray-600">Modo: {modo === "admin" ? "Administrador" : "Invitado"}</p>
+    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
+      <div className="flex justify-between w-full max-w-md mb-4">
+        <h1 className="text-2xl font-bold">🎉 Cumpleaños</h1>
+        {modo === "admin" ? (
+          <div className="flex gap-2">
+            <button onClick={cambiarClave} className="text-sm underline text-blue-600">Cambiar contraseña</button>
+            <button onClick={() => setModo(null)} className="text-sm underline text-red-600">Cerrar sesión</button>
+          </div>
+        ) : (
+          <button onClick={() => setModo(null)} className="text-sm underline text-blue-600">Regresar</button>
+        )}
+      </div>
 
       {modo === "admin" && (
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md space-y-2">
@@ -181,7 +208,7 @@ function App() {
           cumplesFiltrados.map((c, index) => (
             <div key={index} className="bg-white p-4 rounded shadow mb-2 flex justify-between items-center">
               <div>
-                <p className="font-semibold text-lg text-blue-700">{c.nombre}</p>
+                <p className="font-semibold text-lg">{c.nombre}</p>
                 <p className="text-gray-600">{formatearFecha(c.fecha)}</p>
               </div>
               {modo === "admin" && (

@@ -14,6 +14,7 @@ function App() {
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
 
+  // Cargar los cumpleaños guardados en localStorage al inicio
   useEffect(() => {
     const guardados = localStorage.getItem("cumples");
     if (guardados) {
@@ -21,10 +22,12 @@ function App() {
     }
   }, []);
 
+  // Guardar en localStorage cada vez que cumples cambia
   useEffect(() => {
     localStorage.setItem("cumples", JSON.stringify(cumples));
   }, [cumples]);
 
+  // Notificación de cumpleaños hoy
   useEffect(() => {
     const hoy = new Date();
     const cumpleañeros = cumples.filter((c) => {
@@ -65,7 +68,9 @@ function App() {
         return null;
       }
 
-      return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+      return `${year}-${month.toString().padStart(2, "0")}-${day
+        .toString()
+        .padStart(2, "0")}`;
     } catch {
       return null;
     }
@@ -100,6 +105,7 @@ function App() {
     const c = cumples[index];
     setNombre(c.nombre);
     const [y, m, d] = c.fecha.split("-");
+    // Regresa al formato MMDDYYYY para que el usuario pueda editarlo
     setFechaInput(`${m}${d}${y}`);
     setEditIndex(index);
   };
@@ -113,12 +119,17 @@ function App() {
     return [...lista].sort((a, b) => {
       const fechaA = new Date(a.fecha);
       const fechaB = new Date(b.fecha);
-      return fechaA.getMonth() - fechaB.getMonth() || fechaA.getDate() - fechaB.getDate();
+      return (
+        fechaA.getMonth() - fechaB.getMonth() ||
+        fechaA.getDate() - fechaB.getDate()
+      );
     });
   };
 
   const cumplesFiltrados = mesFiltro
-    ? cumples.filter((c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro))
+    ? cumples.filter(
+        (c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro)
+      )
     : cumples;
 
   return (

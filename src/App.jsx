@@ -1,35 +1,23 @@
 import { useState, useEffect } from "react";
-import Confetti from "react-confetti";
-import { useWindowSize } from "@react-hook/window-size";
-
-// Colores e íconos por mes (0 = enero, 11 = diciembre)
-const estiloMes = [
-  { color: "bg-red-100", icono: "🎉" },
-  { color: "bg-pink-100", icono: "❤️" },
-  { color: "bg-yellow-100", icono: "🌼" },
-  { color: "bg-green-100", icono: "🌿" },
-  { color: "bg-blue-100", icono: "🌸" },
-  { color: "bg-purple-100", icono: "☀️" },
-  { color: "bg-orange-100", icono: "🎆" },
-  { color: "bg-teal-100", icono: "🌻" },
-  { color: "bg-rose-100", icono: "🍂" },
-  { color: "bg-amber-100", icono: "🎃" },
-  { color: "bg-lime-100", icono: "🌟" },
-  { color: "bg-indigo-100", icono: "🎁" },
-];
+import { motion, AnimatePresence } from "framer-motion";
 
 function App() {
   const [nombre, setNombre] = useState("");
-  const [fecha, setFecha] = useState("");
+  const [fechaInput, setFechaInput] = useState("");
   const [cumples, setCumples] = useState([]);
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [indiceEdicion, setIndiceEdicion] = useState(null);
-  const [width, height] = useWindowSize();
+  const [editIndex, setEditIndex] = useState(null);
+  const [confeti, setConfeti] = useState(false);
+  const [mesFiltro, setMesFiltro] = useState("");
+
+  const meses = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+  ];
 
   useEffect(() => {
-    const datosGuardados = localStorage.getItem("cumples");
-    if (datosGuardados) {
-      setCumples(JSON.parse(datosGuardados));
+    const guardados = localStorage.getItem("cumples");
+    if (guardados) {
+      setCumples(JSON.parse(guardados));
     }
   }, []);
 
@@ -37,111 +25,217 @@ function App() {
     localStorage.setItem("cumples", JSON.stringify(cumples));
   }, [cumples]);
 
-  const agregarCumple = () => {
-    if (!nombre || !fecha) return;
+  useEffect(() => {
+    const hoy = new Date();
+    const cumpleañeros = cumples.filter((c) => {
+      const [y, m, d] = c.fecha.split("-");
+      return (
+        parseInt(m) === hoy.getMonth() + 1 &&
+        parseInt(d) === hoy.getDate()
+      );
+    });
 
-    if (modoEdicion) {
-      const nuevos = [...cumples];
-      nuevos[indiceEdicion] = { nombre, fecha };
-      setCumples(nuevos);
-      setModoEdicion(false);
-      setIndiceEdicion(null);
+    if (cumpleañeros.length > 0) {
+      alert(
+        `🎉 Hoy están de cumpleaños:\n\n${cumpleañeros
+          .map((c) => c.nombre)
+          .join("\n")}`
+      );
+    }
+  }, [cumples]);
+
+  const formatearFecha = (fecha) => {
+    const [anio, mes, dia] = fecha.split("-");
+    return `${parseInt(dia)} de ${meses[parseInt(mes) - 1]} de ${anio}`;
+  };
+
+  const validarFecha = (valor) => {
+    if (valor.length !== 8) return null;
+    try {
+      const year = parseInt(valor.slice(4, 8), 10);
+      const month = parseInt(valor.slice(0, 2), 10);
+      const day = parseInt(valor.slice(2, 4), 10);
+      const maxDays = new Date(year, month, 0).getDate();
+
+      if (
+        isNaN(year) || year < 1900 || year > 2100 ||
+        isNaN(month) || month < 1 || month > 12 ||
+        isNaN(day) || day < 1 || day > maxDays
+      ) {
+        return null;
+      }
+
+      return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+    } catch {
+      return null;
+    }
+  };
+
+  const agregarOEditarCumple = () => {
+    const fechaFormateada = validarFecha(fechaInput);
+    if (!nombre || !fechaFormateada) {
+      alert("Completa nombre y una fecha válida (MMDDYYYY).");
+      return;
+    }
+
+    const nuevo = { nombre, fecha: fechaFormateada };
+
+    if (editIndex !== null) {
+      const actualizados = [...cumples];
+      actualizados[editIndex] = nuevo;
+      setCumples(ordenarCumples(actualizados));
+      setEditIndex(null);
     } else {
-      setCumples([...cumples, { nombre, fecha }]);
+      const actualizados = [...cumples, nuevo];
+      setCumples(ordenarCumples(actualizados));
+      setConfeti(true);
+      setTimeout(() => setConfeti(false), 3000);
     }
 
     setNombre("");
-    setFecha("");
+    setFechaInput("");
   };
 
   const editarCumple = (index) => {
-    setNombre(cumples[index].nombre);
-    setFecha(cumples[index].fecha);
-    setModoEdicion(true);
-    setIndiceEdicion(index);
+    const c = cumples[index];
+    setNombre(c.nombre);
+    const [y, m, d] = c.fecha.split("-");
+    setFechaInput(`${m}${d}${y}`);
+    setEditIndex(index);
   };
 
   const eliminarCumple = (index) => {
-    const nuevos = cumples.filter((_, i) => i !== index);
-    setCumples(nuevos);
+    const filtrados = cumples.filter((_, i) => i !== index);
+    setCumples(filtrados);
   };
 
-  const formatearFecha = (fechaISO) => {
-    const opciones = { day: "numeric", month: "long", year: "numeric" };
-    return new Date(fechaISO).toLocaleDateString("es-ES", opciones);
+  const ordenarCumples = (lista) => {
+    return [...lista].sort((a, b) => {
+      const fechaA = new Date(a.fecha);
+      const fechaB = new Date(b.fecha);
+      return fechaA.getMonth() - fechaB.getMonth() || fechaA.getDate() - fechaB.getDate();
+    });
   };
+
+  const cumplesFiltrados = mesFiltro
+    ? cumples.filter((c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro))
+    : cumples;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-pink-100 flex flex-col items-center p-6 relative">
-      <Confetti width={width} height={height} numberOfPieces={100} />
+    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6 relative">
+      <motion.h1
+        className="text-3xl font-bold mb-4 text-center"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        🎉 Cumpleaños de Compañeros 🎈
+      </motion.h1>
 
-      <h1 className="text-4xl font-bold text-center mb-4 text-pink-700">
-        🎊 Cumpleaños de Compañeros 🎂
-      </h1>
+      {confeti && (
+        <motion.img
+          src="https://media1.giphy.com/media/VyB31XTqZNJhFRZNyl/giphy.gif"
+          alt="Confetti"
+          className="w-24 h-24 absolute top-10"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+        />
+      )}
 
-      <img
-        src="https://media1.giphy.com/media/VyB31XTqZNJhFRZNyl/giphy.gif"
-        alt="Fiesta"
-        className="w-24 mb-6 rounded shadow"
-      />
-
-      <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md text-center space-y-4">
+      <motion.div
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
         <input
           type="text"
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-300"
+          className="w-full p-2 border rounded text-center"
         />
-
         <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-300"
+          type="text"
+          placeholder="MMDDYYYY"
+          maxLength={8}
+          value={fechaInput}
+          onChange={(e) => setFechaInput(e.target.value)}
+          className="w-full p-2 border rounded text-center"
         />
-
         <button
-          onClick={agregarCumple}
-          className="w-full bg-pink-500 text-white font-semibold py-2 rounded hover:bg-pink-600 transition"
+          onClick={agregarOEditarCumple}
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
         >
-          {modoEdicion ? "Guardar Cambios" : "Agregar Cumpleaños"}
+          {editIndex !== null ? "Guardar Cambios" : "Agregar Cumpleaños"}
         </button>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 w-full max-w-md space-y-4">
-        {cumples.map((c, index) => {
-          const mes = new Date(c.fecha).getMonth();
-          const estilo = estiloMes[mes];
-
-          return (
-            <div
-              key={index}
-              className={`${estilo.color} p-4 rounded-lg shadow-md flex justify-between items-center transition hover:scale-[1.02]`}
+      <div className="mt-6 w-full max-w-md">
+        <div className="flex flex-wrap gap-2 justify-center mb-4">
+          <button
+            onClick={() => setMesFiltro("")}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              mesFiltro === "" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+          >
+            Todos
+          </button>
+          {meses.map((mes, i) => (
+            <button
+              key={i}
+              onClick={() => setMesFiltro(i + 1)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                mesFiltro === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
             >
-              <div>
-                <p className="font-semibold text-lg text-gray-800">
-                  {estilo.icono} {c.nombre}
-                </p>
-                <p className="text-sm text-gray-600">{formatearFecha(c.fecha)}</p>
-              </div>
-              <div className="flex flex-col gap-1 text-sm">
-                <button
-                  onClick={() => editarCumple(index)}
-                  className="text-blue-600 hover:underline"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => eliminarCumple(index)}
-                  className="text-red-600 hover:underline"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          );
-        })}
+              {mes.charAt(0).toUpperCase() + mes.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <AnimatePresence>
+          {cumplesFiltrados.length === 0 ? (
+            <motion.p
+              className="text-center text-gray-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              No hay cumpleaños en este mes.
+            </motion.p>
+          ) : (
+            cumplesFiltrados.map((c, index) => (
+              <motion.li
+                key={index}
+                className="bg-white p-4 mt-2 rounded shadow flex justify-between items-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div>
+                  <p className="font-semibold">{c.nombre}</p>
+                  <p className="text-sm text-gray-600">{formatearFecha(c.fecha)}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => editarCumple(index)}
+                    className="text-blue-500 hover:underline text-sm"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => eliminarCumple(index)}
+                    className="text-red-500 hover:underline text-sm"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </motion.li>
+            ))
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

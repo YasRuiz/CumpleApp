@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 
 function App() {
+  const [modoVista, setModoVista] = useState(null); // "admin" o "invitado"
   const [nombre, setNombre] = useState("");
   const [fechaInput, setFechaInput] = useState("");
   const [cumples, setCumples] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
+  const [confeti, setConfeti] = useState(false);
   const [mesFiltro, setMesFiltro] = useState("");
-  const [darkMode, setDarkMode] = useState(localStorage.theme === "dark");
 
   const meses = [
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -27,14 +27,23 @@ function App() {
   }, [cumples]);
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.theme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.theme = "light";
+    const hoy = new Date();
+    const cumpleañeros = cumples.filter((c) => {
+      const [y, m, d] = c.fecha.split("-");
+      return (
+        parseInt(m) === hoy.getMonth() + 1 &&
+        parseInt(d) === hoy.getDate()
+      );
+    });
+
+    if (cumpleañeros.length > 0) {
+      alert(
+        `🎉 Hoy están de cumpleaños:\n\n${cumpleañeros
+          .map((c) => c.nombre)
+          .join("\n")}`
+      );
     }
-  }, [darkMode]);
+  }, [cumples]);
 
   const formatearFecha = (fecha) => {
     const [anio, mes, dia] = fecha.split("-");
@@ -43,26 +52,24 @@ function App() {
 
   const validarFecha = (valor) => {
     if (valor.length !== 8) return null;
-    const year = parseInt(valor.slice(4, 8), 10);
-    const month = parseInt(valor.slice(0, 2), 10);
-    const day = parseInt(valor.slice(2, 4), 10);
-    const maxDays = new Date(year, month, 0).getDate();
+    try {
+      const year = parseInt(valor.slice(4, 8), 10);
+      const month = parseInt(valor.slice(0, 2), 10);
+      const day = parseInt(valor.slice(2, 4), 10);
+      const maxDays = new Date(year, month, 0).getDate();
 
-    if (
-      isNaN(year) || year < 1900 || year > 2100 ||
-      isNaN(month) || month < 1 || month > 12 ||
-      isNaN(day) || day < 1 || day > maxDays
-    ) return null;
+      if (
+        isNaN(year) || year < 1900 || year > 2100 ||
+        isNaN(month) || month < 1 || month > 12 ||
+        isNaN(day) || day < 1 || day > maxDays
+      ) {
+        return null;
+      }
 
-    return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-  };
-
-  const lanzarConfeti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 90,
-      origin: { y: 0.2 }
-    });
+      return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+    } catch {
+      return null;
+    }
   };
 
   const agregarOEditarCumple = () => {
@@ -77,12 +84,13 @@ function App() {
     if (editIndex !== null) {
       const actualizados = [...cumples];
       actualizados[editIndex] = nuevo;
-      setCumples(actualizados);
+      setCumples(ordenarCumples(actualizados));
       setEditIndex(null);
     } else {
       const actualizados = [...cumples, nuevo];
-      setCumples(actualizados);
-      lanzarConfeti();
+      setCumples(ordenarCumples(actualizados));
+      setConfeti(true);
+      setTimeout(() => setConfeti(false), 3000);
     }
 
     setNombre("");
@@ -102,30 +110,76 @@ function App() {
     setCumples(filtrados);
   };
 
+  const ordenarCumples = (lista) => {
+    return [...lista].sort((a, b) => {
+      const fechaA = new Date(a.fecha);
+      const fechaB = new Date(b.fecha);
+      return fechaA.getMonth() - fechaB.getMonth() || fechaA.getDate() - fechaB.getDate();
+    });
+  };
+
   const cumplesFiltrados = mesFiltro
     ? cumples.filter((c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro))
     : cumples;
 
+  if (!modoVista) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm space-y-4 text-center">
+          <h1 className="text-xl font-bold">Acceder a CumpleApp</h1>
+          <button
+            onClick={() => {
+              const pass = prompt("Ingrese contraseña de administrador:");
+              if (pass === "admin123") {
+                setModoVista("admin");
+              } else {
+                alert("Contraseña incorrecta.");
+              }
+            }}
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            Entrar como Administrador
+          </button>
+
+          <button
+            onClick={() => setModoVista("invitado")}
+            className="w-full bg-gray-300 text-black p-2 rounded hover:bg-gray-400"
+          >
+            Entrar como Invitado
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-pink-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col items-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6 relative">
+      {confeti && (
+        <motion.img
+          src="https://media1.giphy.com/media/VyB31XTqZNJhFRZNyl/giphy.gif"
+          alt="Confetti"
+          className="w-28 h-28 absolute top-10"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+        />
+      )}
+
       <motion.h1
-        className="text-3xl font-bold mb-4 text-center"
+        className="text-3xl font-bold mb-2 text-center text-blue-800"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        🎂 CumpleApp - Cumpleaños 🎈
+        🎉 Cumpleaños de Compañeros 🎈
       </motion.h1>
 
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className="mb-4 px-4 py-1 bg-gray-300 rounded-full text-sm shadow hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 transition"
-      >
-        {darkMode ? "☀️ Modo Claro" : "🌙 Modo Oscuro"}
-      </button>
+      <p className="mb-4 text-sm text-gray-700 italic">
+        Modo: {modoVista === "admin" ? "Administrador" : "Invitado"}
+      </p>
 
       <motion.div
-        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-sm space-y-4"
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -135,7 +189,8 @@ function App() {
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full p-2 border rounded text-center dark:bg-gray-700"
+          className="w-full p-2 border rounded text-center"
+          disabled={modoVista !== "admin"}
         />
         <input
           type="text"
@@ -143,17 +198,20 @@ function App() {
           maxLength={8}
           value={fechaInput}
           onChange={(e) => setFechaInput(e.target.value)}
-          className="w-full p-2 border rounded text-center dark:bg-gray-700"
+          className="w-full p-2 border rounded text-center"
+          disabled={modoVista !== "admin"}
         />
-        <button
-          onClick={agregarOEditarCumple}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-        >
-          {editIndex !== null ? "Guardar Cambios" : "Agregar Cumpleaños"}
-        </button>
+        {modoVista === "admin" && (
+          <button
+            onClick={agregarOEditarCumple}
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+          >
+            {editIndex !== null ? "Guardar Cambios" : "Agregar Cumpleaños"}
+          </button>
+        )}
       </motion.div>
 
-      <div className="mt-6 w-full max-w-sm">
+      <div className="mt-6 w-full max-w-md">
         <div className="flex flex-wrap gap-2 justify-center mb-4">
           <button
             onClick={() => setMesFiltro("")}
@@ -179,7 +237,7 @@ function App() {
         <AnimatePresence>
           {cumplesFiltrados.length === 0 ? (
             <motion.p
-              className="text-center text-gray-500 dark:text-gray-400"
+              className="text-center text-gray-500"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -189,32 +247,32 @@ function App() {
             cumplesFiltrados.map((c, index) => (
               <motion.li
                 key={index}
-                className="bg-white dark:bg-gray-700 p-4 mt-2 rounded shadow flex justify-between items-center"
+                className="bg-white p-4 mt-2 rounded shadow flex justify-between items-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
                 <div>
-                  <p className="font-semibold">{c.nombre}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {formatearFecha(c.fecha)}
-                  </p>
+                  <p className="font-semibold text-blue-800">{c.nombre}</p>
+                  <p className="text-sm text-gray-600">{formatearFecha(c.fecha)}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => editarCumple(index)}
-                    className="text-blue-500 hover:underline text-sm"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => eliminarCumple(index)}
-                    className="text-red-500 hover:underline text-sm"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                {modoVista === "admin" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => editarCumple(index)}
+                      className="text-blue-500 hover:underline text-sm"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => eliminarCumple(index)}
+                      className="text-red-500 hover:underline text-sm"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
               </motion.li>
             ))
           )}

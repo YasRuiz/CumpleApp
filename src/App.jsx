@@ -12,7 +12,7 @@ import {
 
 function App() {
   const [nombre, setNombre] = useState("");
-  const [fechaInput, setFechaInput] = useState(""); // DDMM
+  const [fechaInput, setFechaInput] = useState(""); // Formato DDMM
   const [cumples, setCumples] = useState([]);
   const [editId, setEditId] = useState(null);
   const [mesFiltro, setMesFiltro] = useState("");
@@ -45,9 +45,13 @@ function App() {
   }, [cumples]);
 
   const obtenerCumples = async () => {
-    const data = await getDocs(refCumples);
-    const lista = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    setCumples(lista);
+    try {
+      const data = await getDocs(refCumples);
+      const lista = data.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setCumples(lista);
+    } catch (err) {
+      console.error("Error al obtener cumpleaños:", err);
+    }
   };
 
   const formatearFecha = (fecha) => {
@@ -57,29 +61,38 @@ function App() {
   };
 
   const agregarOEditarCumple = async () => {
-    if (!nombre || !/^\d{4}$/.test(fechaInput)) {
+    if (!nombre || fechaInput.length !== 4) {
       alert("Ingresa nombre y una fecha válida (DDMM).");
       return;
     }
 
     const nuevo = { nombre, fecha: fechaInput };
-    if (editId) {
-      await updateDoc(doc(db, "cumples", editId), nuevo);
-      setCumples(cumples.map(c => c.id === editId ? { ...nuevo, id: editId } : c));
-      setEditId(null);
-    } else {
-      const docRef = await addDoc(refCumples, nuevo);
-      setCumples([...cumples, { ...nuevo, id: docRef.id }]);
-      confetti();
-    }
 
-    setNombre("");
-    setFechaInput("");
+    try {
+      if (editId) {
+        await updateDoc(doc(db, "cumples", editId), nuevo);
+        setEditId(null);
+      } else {
+        await addDoc(refCumples, nuevo);
+        confetti(); // solo si agrega bien
+      }
+
+      setNombre("");
+      setFechaInput("");
+      obtenerCumples();
+    } catch (err) {
+      console.error("Error al guardar cumpleaños:", err);
+      alert("Error al guardar cumpleaños. Verifica la consola.");
+    }
   };
 
   const eliminarCumple = async (id) => {
-    await deleteDoc(doc(db, "cumples", id));
-    setCumples(cumples.filter(c => c.id !== id));
+    try {
+      await deleteDoc(doc(db, "cumples", id));
+      obtenerCumples();
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+    }
   };
 
   const editarCumple = (c) => {
@@ -110,7 +123,6 @@ function App() {
         <div className="bg-white p-6 rounded-lg shadow-lg space-y-4 text-center">
           <h2 className="text-xl font-semibold">¿Cómo quieres ingresar?</h2>
           <button onClick={() => setModo("invitado")} className="bg-green-500 text-white px-4 py-2 rounded">Invitado</button>
-
           <div>
             <input
               type="password"
@@ -152,7 +164,7 @@ function App() {
           onClick={() => setModo(null)}
           className="text-sm text-red-600 underline"
         >
-          {modo === "admin" ? "Cerrar sesión" : "Volver"}
+          Volver
         </button>
       </div>
 

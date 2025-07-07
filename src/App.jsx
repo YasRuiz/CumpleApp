@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 function App() {
   const [nombre, setNombre] = useState("");
@@ -10,8 +10,8 @@ function App() {
   const [mesFiltro, setMesFiltro] = useState("");
 
   const meses = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
   ];
 
   useEffect(() => {
@@ -76,7 +76,7 @@ function App() {
   const lanzarConfeti = () => {
     confetti({
       particleCount: 100,
-      spread: 100,
+      spread: 80,
       origin: { y: 0.6 },
     });
   };
@@ -136,9 +136,9 @@ function App() {
     : cumples;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-gradient-to-tr from-yellow-100 via-pink-100 to-purple-200 flex flex-col items-center p-4">
       <motion.h1
-        className="text-3xl font-bold mb-4 text-center"
+        className="text-4xl font-extrabold text-purple-800 mb-6 text-center"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -147,7 +147,7 @@ function App() {
       </motion.h1>
 
       <motion.div
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"
+        className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -157,7 +157,7 @@ function App() {
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full p-2 border rounded text-center"
+          className="w-full p-3 border border-pink-300 rounded-md text-center text-purple-700 font-semibold"
         />
         <input
           type="text"
@@ -165,22 +165,22 @@ function App() {
           maxLength={8}
           value={fechaInput}
           onChange={(e) => setFechaInput(e.target.value)}
-          className="w-full p-2 border rounded text-center"
+          className="w-full p-3 border border-pink-300 rounded-md text-center text-blue-600 font-semibold"
         />
         <button
           onClick={agregarOEditarCumple}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+          className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white p-3 rounded-md font-bold hover:brightness-110 transition"
         >
-          {editIndex !== null ? "Guardar Cambios" : "Agregar Cumpleaños"}
+          {editIndex !== null ? "Guardar Cambios" : "🎂 Agregar Cumpleaños"}
         </button>
       </motion.div>
 
-      <div className="mt-6 w-full max-w-md">
+      <div className="mt-6 w-full max-w-sm">
         <div className="flex flex-wrap gap-2 justify-center mb-4">
           <button
             onClick={() => setMesFiltro("")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
-              mesFiltro === "" ? "bg-blue-500 text-white" : "bg-gray-200"
+              mesFiltro === "" ? "bg-purple-600 text-white" : "bg-gray-200"
             }`}
           >
             Todos
@@ -189,11 +189,13 @@ function App() {
             <button
               key={i}
               onClick={() => setMesFiltro(i + 1)}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                mesFiltro === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+              className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                mesFiltro === i + 1
+                  ? "bg-pink-500 text-white"
+                  : "bg-yellow-100 text-purple-700"
               }`}
             >
-              {mes.charAt(0).toUpperCase() + mes.slice(1)}
+              {mes}
             </button>
           ))}
         </div>
@@ -211,15 +213,17 @@ function App() {
             cumplesFiltrados.map((c, index) => (
               <motion.li
                 key={index}
-                className="bg-white p-4 mt-2 rounded shadow flex justify-between items-center"
+                className="bg-white p-4 mt-2 rounded-lg shadow-md flex justify-between items-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
                 <div>
-                  <p className="font-semibold">{c.nombre}</p>
-                  <p className="text-sm text-gray-600">{formatearFecha(c.fecha)}</p>
+                  <p className="font-bold text-purple-800">{c.nombre}</p>
+                  <p className="text-sm text-gray-600">
+                    {formatearFecha(c.fecha)}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button

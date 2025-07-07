@@ -94,20 +94,18 @@ function App() {
     alert("Contraseña actualizada correctamente.");
   };
 
-  const cumplesFiltrados = mesFiltro
-    ? cumples.filter(c => parseInt(c.fecha.slice(2, 4)) === parseInt(mesFiltro))
-    : cumples;
+ const cumplesFiltrados = (mesFiltro
+  ? cumples.filter(c => parseInt(c.fecha.slice(2, 4)) === parseInt(mesFiltro))
+  : cumples
+).sort((a, b) => {
+  const mesA = parseInt(a.fecha.slice(2, 4));
+  const mesB = parseInt(b.fecha.slice(2, 4));
+  const diaA = parseInt(a.fecha.slice(0, 2));
+  const diaB = parseInt(b.fecha.slice(0, 2));
 
-  if (!modo) {
-    return (
-      <LoginView
-        intentoClave={intentoClave}
-        setIntentoClave={setIntentoClave}
-        claveAdmin={claveAdmin}
-        setModo={setModo}
-      />
-    );
-  }
+  // Primero por mes, luego por día
+  return mesA !== mesB ? mesA - mesB : diaA - diaB;
+});
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">

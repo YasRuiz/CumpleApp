@@ -10,15 +10,13 @@ function App() {
   const [mesFiltro, setMesFiltro] = useState("");
 
   const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
 
   useEffect(() => {
     const guardados = localStorage.getItem("cumples");
-    if (guardados) {
-      setCumples(JSON.parse(guardados));
-    }
+    if (guardados) setCumples(JSON.parse(guardados));
   }, []);
 
   useEffect(() => {
@@ -46,15 +44,15 @@ function App() {
 
   const formatearFecha = (fecha) => {
     const [anio, mes, dia] = fecha.split("-");
-    return `${parseInt(dia)} de ${meses[parseInt(mes) - 1]} de ${anio}`;
+    return `${dia}/${mes}/${anio}`;
   };
 
   const validarFecha = (valor) => {
     if (valor.length !== 8) return null;
     try {
       const year = parseInt(valor.slice(4, 8), 10);
-      const month = parseInt(valor.slice(0, 2), 10);
-      const day = parseInt(valor.slice(2, 4), 10);
+      const day = parseInt(valor.slice(0, 2), 10);
+      const month = parseInt(valor.slice(2, 4), 10);
       const maxDays = new Date(year, month, 0).getDate();
 
       if (
@@ -73,18 +71,10 @@ function App() {
     }
   };
 
-  const lanzarConfeti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 80,
-      origin: { y: 0.6 },
-    });
-  };
-
   const agregarOEditarCumple = () => {
     const fechaFormateada = validarFecha(fechaInput);
     if (!nombre || !fechaFormateada) {
-      alert("Completa nombre y una fecha válida (MMDDYYYY).");
+      alert("Completa nombre y una fecha válida (DDMMYYYY).");
       return;
     }
 
@@ -98,7 +88,7 @@ function App() {
     } else {
       const actualizados = [...cumples, nuevo];
       setCumples(ordenarCumples(actualizados));
-      lanzarConfeti();
+      confetti({ spread: 80, particleCount: 100, origin: { y: 0.6 } });
     }
 
     setNombre("");
@@ -109,7 +99,7 @@ function App() {
     const c = cumples[index];
     setNombre(c.nombre);
     const [y, m, d] = c.fecha.split("-");
-    setFechaInput(`${m}${d}${y}`);
+    setFechaInput(`${d}${m}${y}`);
     setEditIndex(index);
   };
 
@@ -122,32 +112,27 @@ function App() {
     return [...lista].sort((a, b) => {
       const fechaA = new Date(a.fecha);
       const fechaB = new Date(b.fecha);
-      return (
-        fechaA.getMonth() - fechaB.getMonth() ||
-        fechaA.getDate() - fechaB.getDate()
-      );
+      return fechaA.getMonth() - fechaB.getMonth() || fechaA.getDate() - fechaB.getDate();
     });
   };
 
   const cumplesFiltrados = mesFiltro
-    ? cumples.filter(
-        (c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro)
-      )
+    ? cumples.filter((c) => parseInt(c.fecha.split("-")[1]) === parseInt(mesFiltro))
     : cumples;
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-yellow-100 via-pink-100 to-purple-200 flex flex-col items-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-pink-100 to-yellow-100 flex flex-col items-center p-4 sm:p-6 text-center">
       <motion.h1
-        className="text-4xl font-extrabold text-purple-800 mb-6 text-center"
+        className="text-4xl font-bold mb-6 text-purple-700"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        🎉 Cumpleaños de Compañeros 🎈
+        🎂 Cumpleaños de Compañeros
       </motion.h1>
 
       <motion.div
-        className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4"
+        className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-sm sm:max-w-md space-y-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -157,30 +142,30 @@ function App() {
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full p-3 border border-pink-300 rounded-md text-center text-purple-700 font-semibold"
+          className="w-full p-3 border border-pink-300 rounded-md text-center text-blue-600 font-semibold"
         />
         <input
           type="text"
-          placeholder="MMDDYYYY"
+          placeholder="DDMMYYYY"
           maxLength={8}
           value={fechaInput}
           onChange={(e) => setFechaInput(e.target.value)}
-          className="w-full p-3 border border-pink-300 rounded-md text-center text-blue-600 font-semibold"
+          className="w-full p-3 border border-yellow-400 rounded-md text-center text-purple-600 font-semibold"
         />
         <button
           onClick={agregarOEditarCumple}
-          className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white p-3 rounded-md font-bold hover:brightness-110 transition"
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-md font-bold shadow-md hover:scale-105 transition-transform"
         >
-          {editIndex !== null ? "Guardar Cambios" : "🎂 Agregar Cumpleaños"}
+          {editIndex !== null ? "Guardar Cambios" : "Agregar Cumpleaños"}
         </button>
       </motion.div>
 
-      <div className="mt-6 w-full max-w-sm">
-        <div className="flex flex-wrap gap-2 justify-center mb-4">
+      <div className="mt-8 w-full max-w-sm sm:max-w-md">
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
           <button
             onClick={() => setMesFiltro("")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
-              mesFiltro === "" ? "bg-purple-600 text-white" : "bg-gray-200"
+              mesFiltro === "" ? "bg-indigo-500 text-white" : "bg-gray-200"
             }`}
           >
             Todos
@@ -189,10 +174,8 @@ function App() {
             <button
               key={i}
               onClick={() => setMesFiltro(i + 1)}
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                mesFiltro === i + 1
-                  ? "bg-pink-500 text-white"
-                  : "bg-yellow-100 text-purple-700"
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                mesFiltro === i + 1 ? "bg-pink-400 text-white" : "bg-yellow-200"
               }`}
             >
               {mes}
@@ -213,28 +196,26 @@ function App() {
             cumplesFiltrados.map((c, index) => (
               <motion.li
                 key={index}
-                className="bg-white p-4 mt-2 rounded-lg shadow-md flex justify-between items-center"
+                className="bg-white p-4 mb-2 rounded-xl shadow-md flex justify-between items-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <div>
-                  <p className="font-bold text-purple-800">{c.nombre}</p>
-                  <p className="text-sm text-gray-600">
-                    {formatearFecha(c.fecha)}
-                  </p>
+                <div className="text-left">
+                  <p className="font-bold text-blue-700">{c.nombre}</p>
+                  <p className="text-sm text-gray-600">{formatearFecha(c.fecha)}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => editarCumple(index)}
-                    className="text-blue-500 hover:underline text-sm"
+                    className="text-indigo-500 text-sm hover:underline"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => eliminarCumple(index)}
-                    className="text-red-500 hover:underline text-sm"
+                    className="text-red-500 text-sm hover:underline"
                   >
                     Eliminar
                   </button>
@@ -249,3 +230,4 @@ function App() {
 }
 
 export default App;
+

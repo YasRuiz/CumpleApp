@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
 function App() {
@@ -6,7 +7,6 @@ function App() {
   const [fechaInput, setFechaInput] = useState("");
   const [cumples, setCumples] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
-  const [confeti, setConfeti] = useState(false);
   const [mesFiltro, setMesFiltro] = useState("");
 
   const meses = [
@@ -14,7 +14,6 @@ function App() {
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
 
-  // Cargar los cumpleaños guardados en localStorage al inicio
   useEffect(() => {
     const guardados = localStorage.getItem("cumples");
     if (guardados) {
@@ -22,12 +21,10 @@ function App() {
     }
   }, []);
 
-  // Guardar en localStorage cada vez que cumples cambia
   useEffect(() => {
     localStorage.setItem("cumples", JSON.stringify(cumples));
   }, [cumples]);
 
-  // Notificación de cumpleaños hoy
   useEffect(() => {
     const hoy = new Date();
     const cumpleañeros = cumples.filter((c) => {
@@ -76,6 +73,14 @@ function App() {
     }
   };
 
+  const lanzarConfeti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 100,
+      origin: { y: 0.6 },
+    });
+  };
+
   const agregarOEditarCumple = () => {
     const fechaFormateada = validarFecha(fechaInput);
     if (!nombre || !fechaFormateada) {
@@ -93,8 +98,7 @@ function App() {
     } else {
       const actualizados = [...cumples, nuevo];
       setCumples(ordenarCumples(actualizados));
-      setConfeti(true);
-      setTimeout(() => setConfeti(false), 3000);
+      lanzarConfeti();
     }
 
     setNombre("");
@@ -105,7 +109,6 @@ function App() {
     const c = cumples[index];
     setNombre(c.nombre);
     const [y, m, d] = c.fecha.split("-");
-    // Regresa al formato MMDDYYYY para que el usuario pueda editarlo
     setFechaInput(`${m}${d}${y}`);
     setEditIndex(index);
   };
@@ -133,7 +136,7 @@ function App() {
     : cumples;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
       <motion.h1
         className="text-3xl font-bold mb-4 text-center"
         initial={{ opacity: 0, y: -30 }}
@@ -142,17 +145,6 @@ function App() {
       >
         🎉 Cumpleaños de Compañeros 🎈
       </motion.h1>
-
-      {confeti && (
-        <motion.img
-          src="https://media1.giphy.com/media/VyB31XTqZNJhFRZNyl/giphy.gif"
-          alt="Confetti"
-          className="w-24 h-24 absolute top-10"
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-        />
-      )}
 
       <motion.div
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"

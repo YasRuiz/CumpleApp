@@ -1,6 +1,9 @@
+// Importo React hooks y librerías necesarias
 import { useState, useEffect } from "react";
-import confetti from "canvas-confetti";
-import { db } from "./firebase";
+import confetti from "canvas-confetti"; // Para lanzar confeti cuando agrego un cumpleaños
+import { db } from "./firebase"; // Firebase ya está configurado en otro archivo
+
+// Importo funciones de Firestore
 import {
   collection,
   addDoc,
@@ -10,32 +13,38 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
+// Comienzo mi componente principal
 function App() {
+  // Declaro los estados que voy a usar en mi app
   const [nombre, setNombre] = useState("");
-  const [fechaInput, setFechaInput] = useState(""); // DDMM
+  const [fechaInput, setFechaInput] = useState(""); // Solo DDMM
   const [cumples, setCumples] = useState([]);
-  const [editId, setEditId] = useState(null);
-  const [mesFiltro, setMesFiltro] = useState("");
-  const [modo, setModo] = useState(null);
-  const [intentoClave, setIntentoClave] = useState("");
-  const [claveAdmin, setClaveAdmin] = useState("admin123");
+  const [editId, setEditId] = useState(null); // Para saber si estoy editando
+  const [mesFiltro, setMesFiltro] = useState(""); // Para filtrar cumpleaños por mes
+  const [modo, setModo] = useState(null); // admin o invitado
+  const [intentoClave, setIntentoClave] = useState(""); // Para ingresar como admin
+  const [claveAdmin, setClaveAdmin] = useState("admin123"); // Contraseña por defecto
   const [mostrarCambioClave, setMostrarCambioClave] = useState(false);
-  const [nuevaClave, setNuevaClave] = useState("");
-  const [cumplesHoy, setCumplesHoy] = useState([]);
+  const [nuevaClave, setNuevaClave] = useState(""); // Nueva contraseña que escriba el admin
+  const [cumplesHoy, setCumplesHoy] = useState([]); // Lista de cumpleañeros del día
 
+  // Meses para mostrar etiquetas y nombres legibles
   const meses = [
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
 
+  // Referencia a la colección de cumpleaños en Firebase
   const refCumples = collection(db, "cumples");
 
+  // Al cargar la app obtengo los cumpleaños y la contraseña si está guardada
   useEffect(() => {
     obtenerCumples();
     const claveGuardada = localStorage.getItem("claveAdmin");
     if (claveGuardada) setClaveAdmin(claveGuardada);
   }, []);
 
+  // Cada vez que cambien los cumpleaños, actualizo la lista de los que cumplen hoy
   useEffect(() => {
     const hoy = new Date();
     const dia = hoy.getDate().toString().padStart(2, "0");
@@ -44,18 +53,21 @@ function App() {
     setCumplesHoy(cumples.filter(c => c.fecha === hoyStr));
   }, [cumples]);
 
+  // Función para obtener los cumpleaños desde Firestore
   const obtenerCumples = async () => {
     const data = await getDocs(refCumples);
     const lista = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     setCumples(lista);
   };
 
+  // Función para mostrar la fecha en formato más amigable
   const formatearFecha = (fecha) => {
     const dia = parseInt(fecha.slice(0, 2));
     const mesNum = parseInt(fecha.slice(2, 4)) - 1;
     return `${dia} de ${meses[mesNum]}`;
   };
 
+  // Función para agregar o editar cumpleaños
   const agregarOEditarCumple = async () => {
     if (!nombre || fechaInput.length !== 4) {
       alert("Ingresa nombre y una fecha válida (DDMM).");
@@ -68,7 +80,7 @@ function App() {
       setEditId(null);
     } else {
       await addDoc(refCumples, nuevo);
-      confetti();
+      confetti(); // Tiro confeti cuando agrego
     }
 
     setNombre("");
@@ -76,17 +88,20 @@ function App() {
     obtenerCumples();
   };
 
+  // Elimino cumpleaños desde Firestore
   const eliminarCumple = async (id) => {
     await deleteDoc(doc(db, "cumples", id));
     obtenerCumples();
   };
 
+  // Relleno los campos si quiero editar un cumpleaños existente
   const editarCumple = (c) => {
     setNombre(c.nombre);
     setFechaInput(c.fecha);
     setEditId(c.id);
   };
 
+  // Permito al admin cambiar la clave y la guardo en localStorage
   const cambiarClave = () => {
     if (nuevaClave.length < 4) {
       alert("La nueva contraseña debe tener al menos 4 caracteres.");
@@ -99,6 +114,7 @@ function App() {
     alert("Contraseña actualizada correctamente.");
   };
 
+  // Filtro por mes si el usuario selecciona uno, y ordeno por mes y día
   const cumplesFiltrados = (mesFiltro
     ? cumples.filter(c => parseInt(c.fecha.slice(2, 4)) === parseInt(mesFiltro))
     : cumples
@@ -110,6 +126,7 @@ function App() {
     return mesA !== mesB ? mesA - mesB : diaA - diaB;
   });
 
+  // Si aún no se eligió modo (invitado o admin), muestro la pantalla inicial
   if (!modo) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-pink-200">
@@ -150,6 +167,7 @@ function App() {
     );
   }
 
+  // Vista principal una vez que se eligió un modo
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-100 to-pink-100 flex flex-col items-center p-6">
       <div className="w-full max-w-md flex justify-between items-center mb-4">
@@ -162,6 +180,7 @@ function App() {
         </button>
       </div>
 
+      {/* Muestro si hay cumpleaños hoy */}
       {cumplesHoy.length > 0 && (
         <div className="bg-green-200 p-4 rounded-lg mb-4 text-center w-full max-w-md shadow-md">
           <h2 className="text-lg font-bold text-green-800">🎂 Hoy cumple:</h2>
@@ -173,6 +192,7 @@ function App() {
         </div>
       )}
 
+      {/* Solo el admin puede agregar y editar cumpleaños o cambiar la clave */}
       {modo === "admin" && (
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md space-y-2">
           <input
@@ -224,6 +244,7 @@ function App() {
         </div>
       )}
 
+      {/* Listado de cumpleaños filtrado */}
       <div className="mt-6 w-full max-w-md">
         <div className="flex flex-wrap gap-2 justify-center mb-4">
           <button
@@ -243,6 +264,7 @@ function App() {
           ))}
         </div>
 
+        {/* Muestro los cumpleaños */}
         {cumplesFiltrados.length === 0 ? (
           <p className="text-center text-gray-600">No hay cumpleaños para mostrar.</p>
         ) : (

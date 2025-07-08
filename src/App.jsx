@@ -96,6 +96,13 @@ function App() {
     return mesA !== mesB ? mesA - mesB : diaA - diaB;
   });
 
+  const agrupadosPorMes = cumplesFiltrados.reduce((acc, c) => {
+    const mes = parseInt(c.fecha.slice(2, 4));
+    if (!acc[mes]) acc[mes] = [];
+    acc[mes].push(c);
+    return acc;
+  }, {});
+
   if (!modo) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-yellow-100">
@@ -196,21 +203,26 @@ function App() {
           ))}
         </div>
 
-        {cumplesFiltrados.length === 0 ? (
+        {Object.entries(agrupadosPorMes).length === 0 ? (
           <p className="text-center text-gray-600">No hay cumpleaños para mostrar.</p>
         ) : (
-          cumplesFiltrados.map((c) => (
-            <div key={c.id} className="bg-white p-4 rounded shadow mb-2 flex justify-between items-center">
-              <div>
-                <p className="font-semibold text-lg">{c.nombre}</p>
-                <p className="text-gray-600">{formatearFecha(c.fecha)}</p>
-              </div>
-              {modo === "admin" && (
-                <div className="flex gap-2">
-                  <button onClick={() => editarCumple(c)} className="text-blue-500 text-sm hover:underline">Editar</button>
-                  <button onClick={() => eliminarCumple(c.id)} className="text-red-500 text-sm hover:underline">Eliminar</button>
+          Object.entries(agrupadosPorMes).map(([mes, personas]) => (
+            <div key={mes} className="bg-pink-100 p-4 rounded-lg mb-4 shadow">
+              <h2 className="text-lg font-bold mb-2 text-pink-800">🎉 {meses[mes - 1]} 🎉</h2>
+              {personas.map((c) => (
+                <div key={c.id} className="bg-white p-3 rounded shadow mb-2 flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-lg">{c.nombre}</p>
+                    <p className="text-gray-600 text-sm">{formatearFecha(c.fecha)}</p>
+                  </div>
+                  {modo === "admin" && (
+                    <div className="flex gap-2">
+                      <button onClick={() => editarCumple(c)} className="text-blue-500 text-sm hover:underline">Editar</button>
+                      <button onClick={() => eliminarCumple(c.id)} className="text-red-500 text-sm hover:underline">Eliminar</button>
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
           ))
         )}

@@ -91,5 +91,20 @@ Exportar/Importar cumpleaños (CSV).
 
 Soporte para año completo (no solo DDMM).
 
+## 🚀 Enlace en producción
+
+- Firebase: [https://cumpleapp-18ab6.web.app](https://cumpleapp-18ab6.web.app)
+- GitHub Pages: [https://yasruiz.github.io/CumpleApp/](https://yasruiz.github.io/CumpleApp/)
+
+---
+
+## 🧪 Comandos útiles
+
+### Desarrollo
+```bash
+npm install
+npm run dev
+
+
 📄 Licencia
 Este proyecto es libre para uso personal o educativo. Puedes modificarlo a tu gusto.

@@ -1,9 +1,10 @@
+// vite.config.firebase.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/',
+  base: '/', // Firebase Hosting usa la raíz
   plugins: [
     react(),
     VitePWA({
@@ -17,16 +18,8 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         icons: [
-          {
-            src: 'icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
         ]
       }
     })

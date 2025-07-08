@@ -1,110 +1,133 @@
-🎉 App de Cumpleaños 🎂
-Esta es una aplicación web hecha con React y Firebase para registrar y mostrar cumpleaños. Ofrece una interfaz amigable para invitados y administradores, con funciones como agregar, editar, eliminar y filtrar cumpleaños por mes, así como una contraseña de administrador editable.
+# 🎉 CumpleApp - Aplicación de Cumpleaños
 
-🚀 Características
-Ver cumpleaños de todos los meses o filtrar por mes.
+App web desarrollada con React + Firebase para registrar y consultar cumpleaños. Soporta dos modos de ingreso: **invitado** (solo lectura) y **administrador** (control completo). Incorpora confeti, filtros mensuales, edición en tiempo real y despliegue tanto en Firebase Hosting como en GitHub Pages.
 
-Agregar, editar y eliminar cumpleaños (solo para admins).
+---
 
-Mostrar quién cumple años hoy.
+## 🚀 Características destacadas
 
-Lanzamiento de confeti al agregar cumpleaños.
+* 🔒 **Modo Administrador e Invitado**: inicio con selector de rol. El administrador requiere contraseña editable.
+* 🎂 **Lista de cumpleaños**: vista clara con agrupación por mes.
+* 🔍 **Filtro mensual**: ver todos los cumpleaños o filtrar por un mes específico.
+* 🥳 **Confeti**: al agregar un nuevo cumpleaño (modo admin).
+* 📅 **Hoy cumplen**: sección que resalta los cumpleaños actuales.
+* 🛠️ **Cambiar contraseña admin** desde la interfaz (usa localStorage).
 
-Autenticación básica con contraseña de administrador.
+---
 
-Cambiar contraseña del administrador (almacenada en localStorage).
+## 🧱 Tecnologías utilizadas
 
-🛠️ Tecnologías usadas
-React (hooks y JSX)
+* [React](https://reactjs.org/) + Hooks
+* [Firebase Firestore](https://firebase.google.com/)
+* [Tailwind CSS](https://tailwindcss.com/)
+* [canvas-confetti](https://www.npmjs.com/package/canvas-confetti)
+* [Vite](https://vitejs.dev/) como bundler
+* [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) para PWA
+* [GitHub Pages](https://pages.github.com/) y [Firebase Hosting](https://firebase.google.com/products/hosting) para despliegue
 
-Tailwind CSS (estilos rápidos y responsive)
+---
 
-Firebase Firestore (base de datos)
+## 📁 Estructura del proyecto
 
-canvas-confetti (efecto visual divertido)
+```
+src/
+├── assets/             # Recursos estáticos (iconos, etc.)
+├── components/         # Componentes como CumpleList, CumpleForm, MesFiltro
+├── utils/              # Funciones reutilizables (formateo de fechas)
+├── views/              # (opcional) futuras vistas
+├── App.jsx             # Componente principal con lógica y UI
+├── firebase.js         # Configuración de Firebase
+├── main.jsx            # Punto de entrada React
+├── App.css / index.css # Estilos base y globales
+```
 
-📦 Instalación
-Clona el repositorio:
+---
 
-bash
-Copiar
-Editar
-git clone https://github.com/tu-usuario/cumples-app.git
-cd cumples-app
-Instala las dependencias:
+## 🔧 Instalación y configuración
 
-bash
-Copiar
-Editar
+```bash
+git clone https://github.com/YasRuiz/CumpleApp.git
+cd CumpleApp
 npm install
-Configura Firebase:
+```
 
-Asegúrate de tener un proyecto de Firebase creado. Luego, crea un archivo firebase.js dentro de src/:
+### 📲 Configura Firebase
 
-js
-Copiar
-Editar
-// src/firebase.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+1. Crea un proyecto desde [Firebase Console](https://console.firebase.google.com/)
+2. Agrega tu config en `src/firebase.js`:
+
+```js
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "...",
 };
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-Ejecuta la aplicación:
-
-bash
-Copiar
-Editar
-npm run dev
-🔐 Contraseña de administrador
-Por defecto: admin123
-
-Puedes cambiarla desde la interfaz de administrador.
-
-La nueva contraseña se guarda en localStorage, así que solo es válida para ese navegador/dispositivo.
-
-📁 Estructura del proyecto
-bash
-Copiar
-Editar
-src/
-│
-├── App.jsx            # Componente principal
-├── firebase.js        # Configuración de Firebase
-├── index.js           # Entrada de la app
-└── styles.css         # Estilos (usando Tailwind)
-✅ TODO futuro (opcional)
-Agregar autenticación real con Firebase Auth.
-
-Notificaciones por email o push cuando alguien cumple.
-
-Exportar/Importar cumpleaños (CSV).
-
-Soporte para año completo (no solo DDMM).
-
-## 🚀 Enlace en producción
-
-- Firebase: [https://cumpleapp-18ab6.web.app](https://cumpleapp-18ab6.web.app)
-- GitHub Pages: [https://yasruiz.github.io/CumpleApp/](https://yasruiz.github.io/CumpleApp/)
+```
 
 ---
 
-## 🧪 Comandos útiles
+## 🔐 Contraseña de administrador
 
-### Desarrollo
+* Por defecto: `admin123`
+* Editable desde el modo admin
+* Almacenada en `localStorage` (no segura para producción real)
+
+---
+
+## 👩‍💻 Scripts disponibles
+
 ```bash
-npm install
-npm run dev
+npm run dev        # Desarrollar en localhost:5173
+npm run build      # Build para Firebase (vite.config.firebase.js)
+npm run build:gh   # Build para GitHub Pages (vite.config.github.js)
+npm run preview    # Servidor local para build
+npm run deploy     # Despliega a GitHub Pages
+```
 
+---
 
-📄 Licencia
-Este proyecto es libre para uso personal o educativo. Puedes modificarlo a tu gusto.
+## 🚀 Enlaces en producción
+
+* 🔴 **Firebase**: [https://cumpleapp-18ab6.web.app](https://cumpleapp-18ab6.web.app)
+* 🔵 **GitHub Pages**: [https://yasruiz.github.io/CumpleApp/](https://yasruiz.github.io/CumpleApp/)
+
+---
+
+## ✅ Cambios implementados recientemente
+
+| Cambio                  | Descripción                                                                 |
+| ----------------------- | --------------------------------------------------------------------------- |
+| Modo invitado/admin     | Se agregó selector de rol con contraseña editable para admin                |
+| Confeti                 | Se lanza cuando se agrega un nuevo cumpleaño (modo admin)                   |
+| Agrupación por mes      | Cumpleaños ordenados y agrupados visualmente por mes                        |
+| Filtros visuales        | Botones por mes con estilo activo/inactivo                                  |
+| Firebase + GitHub Pages | Soporte dual de despliegue                                                  |
+| Separación de config    | `vite.config.github.js` y `vite.config.firebase.js` definidos según destino |
+
+---
+
+## 💡 Ideas futuras (TODO)
+
+* Integrar Firebase Auth real (email/password)
+* Exportar e importar cumpleaños (CSV)
+* Notificaciones push en cumpleaños
+* Soporte para fecha completa (con año)
+
+---
+
+## 📜 Licencia
+
+Este proyecto es libre para uso personal y educativo. Puedes modificarlo y adaptarlo según tus necesidades.
+
+---
+
+> Desarrollado por Yas Ruiz 🚀
